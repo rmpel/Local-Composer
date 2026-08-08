@@ -111,7 +111,7 @@ register duplicate rows and watchers.
 npm install
 npm run build      # tsc → lib/
 npm run watch
-./scripts/build.sh # distributable zip in dist/
+./scripts/build.sh # distributable tgz in dist/
 ```
 
 ## Roadmap

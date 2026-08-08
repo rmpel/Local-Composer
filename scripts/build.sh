@@ -15,7 +15,7 @@
 # directory. That folder must be self-contained: compiled lib/ + a
 # *production-only* node_modules (Local does not run `npm install` or tsc for
 # the user). This script compiles, stages exactly those files, installs prod
-# dependencies cleanly, and zips the result to dist/<slug>-v<version>.zip.
+# dependencies cleanly, and packages the result to dist/<slug>-v<version>.tgz.
 #
 set -euo pipefail
 
@@ -30,16 +30,21 @@ PRODUCT="$(node -p "require('./package.json').productName || require('./package.
 STAGE="$ROOT/build"
 PKG_DIR="$STAGE/$NAME"
 DIST="$ROOT/dist"
-ZIP="$DIST/${NAME}-v${VERSION}.zip"
+ZIP="$DIST/${NAME}-v${VERSION}.tgz"
 
 echo "==> Building $PRODUCT v$VERSION"
 
 # --- compile -------------------------------------------------------------------
 echo "==> Compiling TypeScript"
-npx tsc
+# npx would fall back to the unrelated, deprecated "tsc" npm package when
+# typescript is not installed locally - always use the project-local binary.
+if [ ! -x node_modules/.bin/tsc ]; then
+	npm install --include=dev --no-audit --no-fund
+fi
+./node_modules/.bin/tsc
 
 # --- clean ---------------------------------------------------------------------
-rm -rf "$STAGE" "$ZIP"
+rm -rf "$STAGE" "$DIST/${NAME}-v${VERSION}.zip" "$ZIP"
 mkdir -p "$PKG_DIR" "$DIST"
 
 # --- stage the files that ship in the add-on ----------------------------------
@@ -65,7 +70,10 @@ echo "==> Installing production dependencies"
 	fi
 )
 
-if [ ! -d "$PKG_DIR/node_modules" ]; then
+# Add-ons without production dependencies legitimately end up without a
+# node_modules folder - only fail when dependencies were expected.
+HAS_DEPS="$(node -p "Object.keys(require('./package.json').dependencies||{}).length>0")"
+if [ "true" = "$HAS_DEPS" ] && [ ! -d "$PKG_DIR/node_modules" ]; then
 	echo "ERROR: node_modules missing after install — aborting." >&2
 	exit 1
 fi
@@ -74,11 +82,11 @@ fi
 echo "==> Creating archive"
 (
 	cd "$STAGE"
-	zip -rq "$ZIP" "$NAME" -x '*/.DS_Store' '*/.git/*' '*/npm-debug.log*'
+	tar --exclude='.DS_Store' --exclude='.git' --exclude='npm-debug.log' -zcf "$ZIP" "$NAME"
 )
 
 SIZE="$(du -h "$ZIP" | cut -f1)"
 echo
 echo "==> Done: $ZIP  ($SIZE)"
-echo "    Install: unzip into Local's addons directory, then restart Local"
-echo "    and enable '$PRODUCT' under Add-ons -> Installed."
+echo "    Install: in Local choose Add-ons -> Install from disk and select the .tgz,"
+echo "    then enable '$PRODUCT' under Add-ons -> Installed."

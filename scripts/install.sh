@@ -21,7 +21,12 @@ esac
 
 echo "Installing dependencies…"
 cd "$ADDON_DIR"
-npm install --omit=dev --no-audit --no-fund
+# Dev dependencies included on purpose: typescript is needed to build lib/
+# (package.json points Local at lib/, which a fresh checkout does not have).
+npm install --include=dev --no-audit --no-fund
+
+echo "Building…"
+./node_modules/.bin/tsc
 
 mkdir -p "$ADDONS_ROOT"
 LINK="$ADDONS_ROOT/local-composer"

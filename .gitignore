@@ -1,2 +1,10 @@
-node_modules
+# Dependencies — restored with `npm install` or bundled by build.sh
+node_modules/
 
+# Build output
+build/
+
+# OS / editor cruft
+.DS_Store
+*.log
+npm-debug.log*
