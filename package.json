@@ -6,7 +6,7 @@
 	"keywords": [
 		"local-addon"
 	],
-	"bgColor": "#885630",
+	"bgColor": "#f6efe7",
 	"icon": "icon.svg",
 	"slug": "local-composer",
 	"description": "First-class composer-based WordPress projects in Local: custom webroots (public_html, web), working WordPress version & multisite domain sync, and PHP version sync with composer.json.",
