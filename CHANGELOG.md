@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4 — 2026-08-09
+
+- New icon: official Composer conductor logo, on a light tile color matching the first-party add-on style (`bgColor` in package.json).
+- Removed the `slug` field from package.json: clicking the add-on tile made Local open its marketplace detail page, which crashes ("Cannot read properties of undefined (reading 'toString')") for add-ons not published in the marketplace. Without `slug` the tile is inert, like first-party unlisted add-ons.
+
 ## 0.4.3 — 2026-08-08
 
 - **Fix: `openssl.cafile` pointed at `app/public/wp-includes/…`** on
