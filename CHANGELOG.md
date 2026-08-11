@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- **Fix: "This site's WordPress URL settings do not match the host set in
+  Local" warning on every running composer site.** Local's troubleshooting
+  bar reads `home`/`siteurl` straight from the database and compares them
+  to the site host after stripping only the protocol — but on a
+  core-in-subdirectory site `siteurl` is legitimately
+  `https://<host>/wp`, so the check could never pass (and the banner's
+  "Fix it" button is accidentally a no-op: the domain changer bails when
+  the old domain contains the new one, which `<host>/wp` vs `<host>`
+  always does). New wrap of `SiteDatabaseService.runQuery` — the funnel
+  both the banner check and the domain changer go through — strips the
+  known core subdir from the returned `siteurl`. The domain part passes
+  through untouched, so a genuine mismatch (a stale production URL in the
+  database) still shows the warning and is now actually fixable. Stock
+  sites and all other queries are untouched.
+
 ## 0.4.4 — 2026-08-09
 
 - New icon: official Composer conductor logo, on a light tile color matching the first-party add-on style (`bgColor` in package.json).

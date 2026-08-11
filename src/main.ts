@@ -10,11 +10,12 @@ import {
 } from './webroot';
 import { getProject, invalidateProject } from './project';
 import { buildEnvState, fixEnvDbHost } from './envFix';
+import { applySiteUrlQueryPatch } from './siteUrlFix';
 import registerAddSiteComposer from './addSiteComposer';
 import registerPhpSync from './phpSync';
 
 export default function (context: LocalMain.AddonMainContext): void {
-	const { siteData, localLogger, wpCli, lightningServices, configTemplates } =
+	const { siteData, localLogger, wpCli, lightningServices, configTemplates, siteDatabase } =
 		LocalMain.getServiceContainer().cradle as any;
 
 	const logger = localLogger.child({
@@ -162,4 +163,10 @@ export default function (context: LocalMain.AddonMainContext): void {
 	 * local-composer-php, now integrated).
 	 */
 	registerPhpSync(context, logger);
+
+	/**
+	 * Part 6 — suppress the "WordPress URL settings do not match the host"
+	 * false positive on core-in-subdirectory sites. See siteUrlFix.ts.
+	 */
+	applySiteUrlQueryPatch({ siteDatabase, logger });
 }
